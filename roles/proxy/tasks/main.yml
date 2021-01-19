@@ -1,0 +1,68 @@
+- name: create certbot folder
+  become_user: root
+  file: 
+    dest=/etc/letsencrypt
+    mode=755
+    state=directory
+    owner={{ansible_user_id}}
+    group={{ansible_user_id}}
+  when: isHTTPS
+
+- name: create nginx log (access)
+  become_user: root
+  file:
+    dest=/tmp/access.log
+    mode=666
+    state=touch
+    owner={{ansible_user_id}}
+    group={{ansible_user_id}}
+
+- name: create nginx log (error)
+  become_user: root
+  file:
+    dest=/tmp/error.log
+    mode=666
+    state=touch
+    owner={{ansible_user_id}}
+    group={{ansible_user_id}}
+
+- name: nginx.conf
+  template:
+    src=httpNginx.j2
+    dest=/tmp/proxy.conf
+    mode=666
+  when: not isHTTPS
+
+- name: nginx.conf
+  template:
+    src=httpsNginx.j2
+    dest=/tmp/proxy.conf
+    mode=666
+  when: isHTTPS
+
+- name: remove last container
+  command:
+    docker rm last_proxy
+  ignore_errors: yes
+
+- name: rename current container
+  command:
+    docker rename proxy last_proxy
+  ignore_errors: yes
+
+- name: stop last container
+  command:
+    docker stop last_proxy
+  ignore_errors: yes
+
+- name: start proxy service
+  command: docker run \
+    --name=proxy \
+    --net=host -d \
+    -v /tmp/proxy.conf:/etc/nginx/conf.d/default.conf \
+    -v /etc/letsencrypt:/etc/letsencrypt \
+    -v /tmp/access.log:/var/log/nginx/access.log \
+    -v /tmp/error.log:/var/log/nginx/error.log \
+    -t nginx:1.19.6
+  tags: proxy
+

@@ -1,0 +1,9 @@
+[main]
+localhost
+
+[main:vars]
+ansible_connection=local
+ansible_ssh_user=codefr33k
+isHTTPS=False
+server_name=localhost
+

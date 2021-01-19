@@ -1,0 +1,9 @@
+[main]
+codefr33k.live
+
+[main:vars]
+ansible_ssh_user=root
+ansible_ssh_host=188.166.221.57
+isHTTPS=True
+server_name=codefr33k.live
+

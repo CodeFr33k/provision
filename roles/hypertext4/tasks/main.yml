@@ -1,0 +1,30 @@
+- name: create custom network
+  command:
+    docker network create \
+    -d bridge hypertext_network
+  ignore_errors: yes
+
+- name: remove last container
+  command:
+    docker rm last_hypertext4
+  ignore_errors: yes
+
+- name: rename current container
+  command:
+    docker rename hypertext4 last_hypertext4
+  ignore_errors: yes
+
+- name: stop last container
+  command:
+    docker stop last_hypertext4
+  ignore_errors: yes
+
+- name: start hypertext4 service
+  command: docker run \
+    --name=hypertext4 \
+    --entrypoint=npm \
+    -p 3000:3000 \
+    hypertext4 \
+    run start:prod
+  tags: hypertext4
+
